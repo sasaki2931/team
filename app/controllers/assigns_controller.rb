@@ -26,16 +26,19 @@ class AssignsController < ApplicationController
     params[:email]
   end
 
+
   def assign_destroy(assign, assigned_user)
-    if assigned_user == assign.team.owner
-      I18n.t('views.messages.cannot_delete_the_leader')
-    elsif Assign.where(user_id: assigned_user.id).count == 1
+    if assigned_user == assign.team.owner #所属ユーザーとオーナーは同じ？
+      I18n.t('views.messages.cannot_delete_the_leader')#リーダーを削除できません
+    
+    elsif Assign.where(user_id: assigned_user.id).count == 1 #所属メンバーが一人の場合
       I18n.t('views.messages.cannot_delete_only_a_member')
-    elsif assign.destroy
+    elsif current_user.id == assign.team.owner_id || current_user.id == assigned_user.id
+      assign.destroy 
       set_next_team(assign, assigned_user)
       I18n.t('views.messages.delete_member')
     else
-      I18n.t('views.messages.cannot_delete_member_4_some_reason')
+      I18n.t('views.messages.cannot_delete_member_4_some_reason')#何らかの理由により
     end
   end
 
